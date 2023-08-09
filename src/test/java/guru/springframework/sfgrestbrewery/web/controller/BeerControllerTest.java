@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -47,7 +48,8 @@ class BeerControllerTest {
 
     @Test
     void listBeers() {
-        BeerPagedList beerPagedList = new BeerPagedList(Arrays.asList(validBeer, validBeer));
+        List<BeerDto> beerDtos = Arrays.asList(validBeer, validBeer);
+        BeerPagedList beerPagedList = new BeerPagedList(beerDtos, PageRequest.of(1,1), beerDtos.size());
 
         given(beerService.listBeers(any(), any(), any(), any())).willReturn(beerPagedList);
 
