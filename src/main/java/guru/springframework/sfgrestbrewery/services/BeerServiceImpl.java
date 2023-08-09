@@ -12,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,7 +32,7 @@ public class BeerServiceImpl implements BeerService {
 
     @Cacheable(cacheNames = "beerListCache", condition = "#showInventoryOnHand == false ")
     @Override
-    public BeerPagedList listBeers(String beerName, BeerStyleEnum beerStyle, PageRequest pageRequest, Boolean showInventoryOnHand) {
+    public Mono<BeerPagedList> listBeers(String beerName, BeerStyleEnum beerStyle, PageRequest pageRequest, Boolean showInventoryOnHand) {
 
         BeerPagedList beerPagedList = null;
         Page<Beer> beerPage;
@@ -70,32 +72,27 @@ public class BeerServiceImpl implements BeerService {
 //                    beerPage.getTotalElements());
 //        }
 
-        return beerPagedList;
+        return Mono.just(beerPagedList);
     }
 
     @Cacheable(cacheNames = "beerCache", key = "#beerId", condition = "#showInventoryOnHand == false ")
     @Override
-    public BeerDto getById(UUID beerId, Boolean showInventoryOnHand) {
-//        if (showInventoryOnHand) {
-//            return beerMapper.beerToBeerDtoWithInventory(
-//                    beerRepository.findById(beerId).orElseThrow(NotFoundException::new)
-//            );
-//        } else {
-//            return beerMapper.beerToBeerDto(
-//                    beerRepository.findById(beerId).orElseThrow(NotFoundException::new)
-//            );
-//        }
-        return null;
+    public Mono<BeerDto> getById(Integer beerId, Boolean showInventoryOnHand) {
+        if (showInventoryOnHand) {
+            return beerRepository.findById(beerId).map(beerMapper::beerToBeerDtoWithInventory);
+        } else {
+            return beerRepository.findById(beerId).map(beerMapper::beerToBeerDto);
+        }
     }
 
     @Override
-    public BeerDto saveNewBeer(BeerDto beerDto) {
+    public Mono<BeerDto> saveNewBeer(BeerDto beerDto) {
         //return beerMapper.beerToBeerDto(beerRepository.save(beerMapper.beerDtoToBeer(beerDto)));
         return null;
     }
 
     @Override
-    public BeerDto updateBeer(UUID beerId, BeerDto beerDto) {
+    public Mono<BeerDto> updateBeer(Integer beerId, BeerDto beerDto) {
 //        Beer beer = beerRepository.findById(beerId).orElseThrow(NotFoundException::new);
 //
 //        beer.setBeerName(beerDto.getBeerName());
@@ -109,12 +106,13 @@ public class BeerServiceImpl implements BeerService {
 
     @Cacheable(cacheNames = "beerUpcCache")
     @Override
-    public BeerDto getByUpc(String upc) {
-        return beerMapper.beerToBeerDto(beerRepository.findByUpc(upc));
+    public Mono<BeerDto> getByUpc(String upc) {
+        return Mono.just(beerMapper.beerToBeerDto(beerRepository.findByUpc(upc)));
     }
 
     @Override
-    public void deleteBeerById(UUID beerId) {
+    public ResponseEntity<Void> deleteBeerById(Integer beerId) {
         beerRepository.deleteById(beerId);
+        return ResponseEntity.ok().build();
     }
 }

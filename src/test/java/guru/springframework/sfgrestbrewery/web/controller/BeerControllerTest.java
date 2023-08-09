@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +52,7 @@ class BeerControllerTest {
         List<BeerDto> beerDtos = Arrays.asList(validBeer, validBeer);
         BeerPagedList beerPagedList = new BeerPagedList(beerDtos, PageRequest.of(1,1), beerDtos.size());
 
-        given(beerService.listBeers(any(), any(), any(), any())).willReturn(beerPagedList);
+        given(beerService.listBeers(any(), any(), any(), any())).willReturn(Mono.just(beerPagedList));
 
         webTestClient.get()
                 .uri("/api/v1/beer")
@@ -65,8 +66,8 @@ class BeerControllerTest {
 
     @Test
     void getBeerById() {
-        UUID beerId = UUID.randomUUID();
-        given(beerService.getById(any(), any())).willReturn(validBeer);
+        Integer beerId = 1;
+        given(beerService.getById(any(), any())).willReturn(Mono.just(validBeer));
 
         webTestClient.get()
                 .uri("/api/v1/beer/" + beerId)
@@ -81,7 +82,7 @@ class BeerControllerTest {
     void getBeerByUpc() {
         String upc = "123456789";
 
-        given(beerService.getByUpc(upc)).willReturn(validBeer);
+        given(beerService.getByUpc(upc)).willReturn(Mono.just(validBeer));
 
         webTestClient.get()
                 .uri("/api/v1/beerUpc/" + upc)
