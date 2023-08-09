@@ -107,7 +107,7 @@ public class BeerServiceImpl implements BeerService {
     @Cacheable(cacheNames = "beerUpcCache")
     @Override
     public Mono<BeerDto> getByUpc(String upc) {
-        return Mono.just(beerMapper.beerToBeerDto(beerRepository.findByUpc(upc)));
+        return beerRepository.findByUpc(upc).map(beerMapper::beerToBeerDto);
     }
 
     @Override
