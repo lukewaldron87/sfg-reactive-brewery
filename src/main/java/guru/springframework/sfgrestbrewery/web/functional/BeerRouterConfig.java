@@ -14,8 +14,8 @@ public class BeerRouterConfig {
 
     public static final String BEER_V2_URL = "/api/v2/beer";
     public static final String BEER_V2_URL_ID = BEER_V2_URL + "/{beerId}";
-    public static final String BEER_V2_URL_UPC =  "/api/v2/beerUpc/";
-    public static final String BEER_V2_URL_UPC_ID =  BEER_V2_URL_UPC + "{upc}";
+    public static final String BEER_V2_URL_UPC =  "/api/v2/beerUpc";
+    public static final String BEER_V2_URL_UPC_ID =  BEER_V2_URL_UPC + "/{upc}";
 
     @Bean
     public RouterFunction<ServerResponse> beerRoutesV2(BeerHandlerV2 handler){
@@ -24,6 +24,7 @@ public class BeerRouterConfig {
                 .GET(BEER_V2_URL_UPC_ID, accept(APPLICATION_JSON), handler::getBeerByUpc)
                 .POST(BEER_V2_URL, accept(APPLICATION_JSON), handler::saveNewBeer)
                 .PUT(BEER_V2_URL_ID, accept(APPLICATION_JSON), handler::updateBeer)
+                .DELETE(BEER_V2_URL_ID, accept(APPLICATION_JSON), handler::deleteBeer)
                 .build();
     }
 }

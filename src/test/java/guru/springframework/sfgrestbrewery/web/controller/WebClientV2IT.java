@@ -22,6 +22,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class WebClientV2IT {
     public static final String BASE_URL = "http://localhost:8080";
@@ -34,6 +36,39 @@ public class WebClientV2IT {
                 .baseUrl(BASE_URL)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create().wiretap(true)))
                 .build();
+    }
+
+    @Test
+    void testDeleteBeer() {
+        Integer beerId = 3;
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        webClient.delete().uri("/api/v2/beer/" + beerId )
+                .retrieve().toBodilessEntity()
+                .flatMap(responseEntity -> {
+                    countDownLatch.countDown();
+
+                    return webClient.get().uri("/api/v2/beer/" + beerId)
+                            .accept(MediaType.APPLICATION_JSON)
+                            .retrieve().bodyToMono(BeerDto.class);
+                }) .subscribe(savedDto -> {
+
+                }, throwable -> {
+                    countDownLatch.countDown();
+                });
+    }
+
+    @Test
+    void testDeleteBeerNotFound() {
+        Integer beerId = 4;
+
+        webClient.delete().uri("/api/v2/beer/" + beerId )
+                .retrieve().toBodilessEntity().block();
+
+        assertThrows(WebClientResponseException.NotFound.class, () -> {
+            webClient.delete().uri("/api/v2/beer/" + beerId )
+                    .retrieve().toBodilessEntity().block();
+        });
     }
 
     @Test
@@ -197,14 +232,14 @@ public class WebClientV2IT {
     void getByUpc() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        Mono<BeerDto> beerDtoMono = webClient.get().uri(BeerRouterConfig.BEER_V2_URL_UPC + "/" + BeerLoader.BEER_4_UPC)
+        Mono<BeerDto> beerDtoMono = webClient.get().uri(BeerRouterConfig.BEER_V2_URL_UPC + "/" + BeerLoader.BEER_14_UPC)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(BeerDto.class);
 
         beerDtoMono.subscribe(beer -> {
             assertThat(beer).isNotNull();
             assertThat(beer.getBeerName()).isNotNull();
-            assertThat(beer.getUpc()).isEqualTo(BeerLoader.BEER_4_UPC);
+            assertThat(beer.getUpc()).isEqualTo(BeerLoader.BEER_14_UPC);
             countDownLatch.countDown();
         });
 
