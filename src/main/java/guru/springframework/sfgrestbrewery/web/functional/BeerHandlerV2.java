@@ -27,8 +27,13 @@ public class BeerHandlerV2 {
                     return beerService.updateBeer(Integer.valueOf(request.pathVariable("beerId")), beerDto);
                 })
                 .flatMap(updatedBeerDto -> {
-                    log.debug("Updated Beer Id: {}", updatedBeerDto.getId());
-                    return ServerResponse.noContent().build();
+                    if(updatedBeerDto.getId() != null) {
+                        log.debug("Updated Beer Id: {}", updatedBeerDto.getId());
+                        return ServerResponse.noContent().build();
+                    }else {
+                        log.debug("Beer Id: {} Not Found", request.pathVariable("beerId"));
+                        return ServerResponse.notFound().build();
+                    }
                 });
     }
 
