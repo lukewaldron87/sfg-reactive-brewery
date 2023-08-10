@@ -50,6 +50,7 @@ class BeerControllerTest {
     @Test
     void listBeers() {
         List<BeerDto> beerDtos = Arrays.asList(validBeer, validBeer);
+
         BeerPagedList beerPagedList = new BeerPagedList(beerDtos, PageRequest.of(1,1), beerDtos.size());
 
         given(beerService.listBeers(any(), any(), any(), any())).willReturn(Mono.just(beerPagedList));
