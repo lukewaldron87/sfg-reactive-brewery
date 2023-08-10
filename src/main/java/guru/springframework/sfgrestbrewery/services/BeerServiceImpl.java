@@ -113,7 +113,7 @@ public class BeerServiceImpl implements BeerService {
 
     @Override
     public ResponseEntity<Void> deleteBeerById(Integer beerId) {
-        beerRepository.deleteById(beerId);
+        beerRepository.deleteById(beerId).subscribe();
         return ResponseEntity.ok().build();
     }
 }
