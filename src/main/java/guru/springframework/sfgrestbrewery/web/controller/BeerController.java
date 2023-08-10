@@ -85,6 +85,10 @@ public class BeerController {
 
     @PutMapping("beer/{beerId}")
     public ResponseEntity<Void> updateBeerById(@PathVariable("beerId") Integer beerId, @RequestBody @Validated BeerDto beerDto){
+
+        // subscribe creates back pressure for the return value
+        beerService.updateBeer(beerId, beerDto).subscribe();
+
         return ResponseEntity.noContent().build();
     }
 
